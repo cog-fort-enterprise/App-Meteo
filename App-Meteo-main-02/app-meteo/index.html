@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Nome app</title>
+        <title>CloudIo</title>
 
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
@@ -18,8 +18,7 @@
     
     <body>
         <div>
-            <!--ESEMPI NOME APP :  Cloudio – Rainly – Stormly...-->
-            <h1>NOME APP</h1>
+            <h1>CloudIo</h1>
         </div>
 
         <div>
@@ -54,13 +53,16 @@
 
         <div id="map"></div>
 
-        <div id="meteo_comune" style="display: none;">
-            <div id="temperatura"></div>
-            <div id="dati_ambiente"></div>
+        <div id="meteo_comune" >
+            <div id="colonna">
+                <div id="info_comune" class="meteo_info"></div>
+                <div id="temperatura" class="meteo_info"></div>
+            </div>
+            <div id="dati_ambiente" class="meteo_info"></div>
+            <a href="dettaglio.html" id="link_dettaglio"><button id="mostra_dettagli">Mostra dettagli</button></a>
         </div>
 
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-        <!--<script src="js/main.js"></script>-->
         <script src="js/main.js"></script>
 
     </body>
