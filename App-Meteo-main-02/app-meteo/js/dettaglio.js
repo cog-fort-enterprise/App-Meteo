@@ -35,9 +35,11 @@ async function caricaPrevisioniSettimana(lat, lon) {
             const tmin = daily.temperature_2m_min[i];
             const pioggia = daily.precipitation_sum[i];
             const ventoMax = daily.wind_speed_10m_max[i];
+            const codiceMeteo = daily.weather_code[i];
 
             previsioni[i].innerHTML = `
                 <h3>${i === 0 ? "Oggi" : giorniSettimana[numGiorno]}</h3>
+                <p>${weatherEmoji(codiceMeteo)} ${weatherDescription(codiceMeteo)}</p>
                 <p>Max: ${tmax}°C</p>
                 <p>Min: ${tmin}°C</p>
                 <p>Pioggia: ${pioggia} mm</p>
@@ -56,6 +58,54 @@ async function caricaPrevisioniSettimana(lat, lon) {
     }
 }
 
+/* ========== Associa icona a meteo ========== */
+function weatherEmoji(code) {
+    const mapping = {
+        0: "☀️",   1: "🌤️",  2: "⛅",   3: "☁️",
+        45: "🌥️", 48: "🌥️", 51: "🌦️", 53: "🌦️",
+        55: "🌦️", 56: "🌦️", 57: "🌦️", 61: "🌧️",
+        63: "🌧️", 65: "🌧️", 66: "🌧️", 67: "🌧️",
+        71: "🌨️", 73: "🌨️", 75: "🌨️", 77: "🌨️",
+        80: "🌦️", 81: "🌦️", 82: "🌦️", 85: "🌨️",
+        86: "🌨️", 95: "⛈️", 96: "⛈️", 99: "⛈️"
+    };
+    return mapping[code] || "❓";
+}
+
+function weatherDescription(code) {
+    const mapping = {
+        0: "Sereno",
+        1: "Poco nuvoloso",
+        2: "Parzialmente nuvoloso",
+        3: "Nuvoloso",
+        45: "Nebbia leggera",
+        48: "Nebbia con brina",
+        51: "Pioggia leggera",
+        53: "Pioggia moderata",
+        55: "Pioggia intensa",
+        56: "Pioggia ghiacciata leggera",
+        57: "Pioggia ghiacciata intensa",
+        61: "Pioggia debole",
+        63: "Pioggia moderata",
+        65: "Pioggia forte",
+        66: "Pioggia ghiacciata leggera",
+        67: "Pioggia ghiacciata forte",
+        71: "Neve leggera",
+        73: "Neve moderata",
+        75: "Neve intensa",
+        77: "Fiocchi di neve",
+        80: "Pioggia a rovesci leggera",
+        81: "Pioggia a rovesci moderata",
+        82: "Pioggia a rovesci intensa",
+        85: "Neve a rovesci leggera",
+        86: "Neve a rovesci intensa",
+        95: "Temporale",
+        96: "Temporale con pioggia leggera",
+        99: "Temporale con pioggia intensa"
+    };
+    return mapping[code] || "Meteo sconosciuto";
+}
+
 /* ======== Lettura da URL ======== */
 let queryString = window.location.search;
 let urlParams = new URLSearchParams(queryString);
@@ -71,5 +121,4 @@ document.addEventListener("DOMContentLoaded", function(){
     comune.innerHTML = nomeComune + " (" + nomeProvincia + "), " + nomeRegione;
     caricaPrevisioniSettimana(lat, lon);
 })
-
 
