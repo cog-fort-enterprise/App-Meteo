@@ -183,6 +183,40 @@ function weatherEmoji(code) {
     return mapping[code] || "❓";
 }
 
+function weatherDescription(code) {
+    const mapping = {
+        0: "Sereno",
+        1: "Poco nuvoloso",
+        2: "Parzialmente nuvoloso",
+        3: "Nuvoloso",
+        45: "Nebbia leggera",
+        48: "Nebbia con brina",
+        51: "Pioggia leggera",
+        53: "Pioggia moderata",
+        55: "Pioggia intensa",
+        56: "Pioggia ghiacciata leggera",
+        57: "Pioggia ghiacciata intensa",
+        61: "Pioggia debole",
+        63: "Pioggia moderata",
+        65: "Pioggia forte",
+        66: "Pioggia ghiacciata leggera",
+        67: "Pioggia ghiacciata forte",
+        71: "Neve leggera",
+        73: "Neve moderata",
+        75: "Neve intensa",
+        77: "Fiocchi di neve",
+        80: "Pioggia a rovesci leggera",
+        81: "Pioggia a rovesci moderata",
+        82: "Pioggia a rovesci intensa",
+        85: "Neve a rovesci leggera",
+        86: "Neve a rovesci intensa",
+        95: "Temporale",
+        96: "Temporale con pioggia leggera",
+        99: "Temporale con pioggia intensa"
+    };
+    return mapping[code] || "Meteo sconosciuto";
+}
+
 /* ========== Meteo tramite Open-Meteo ======== */
 async function caricaMeteo(lat, lon) {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}
@@ -203,6 +237,7 @@ async function caricaMeteo(lat, lon) {
         const vento = current.windspeed;
         const codiceMeteo = current.weathercode;
         const emojiMeteo = weatherEmoji(codiceMeteo);
+        const descrizioneMeteo = weatherDescription(codiceMeteo);
 
         const tmax = giornaliero.temperature_2m_max[0];
         const tmin = giornaliero.temperature_2m_min[0];
@@ -220,6 +255,7 @@ async function caricaMeteo(lat, lon) {
         `;
 
         div_temperatura.innerHTML = `
+            <p>${emojiMeteo} ${descrizioneMeteo}</p>
             <p>Temperatura attuale: ${tempAttuale}°C</p>
             <p>Massima oggi: ${tmax}°C</p>
             <p>Minima oggi: ${tmin}°C</p>
@@ -300,4 +336,3 @@ button_mostra_dettagli.addEventListener("click", trovaURL);
 
 /* ========== Avvio ========== */
 document.addEventListener("DOMContentLoaded", caricaComuni);
-
