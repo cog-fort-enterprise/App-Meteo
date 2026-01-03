@@ -1,4 +1,4 @@
-![icon](https://github.com/cog-fort-enterprise/App-Meteo/edit/css-fixed/app_meteo/img/logo.svg)
+![icon](app_meteo/img/logo.svg)
 # Cloud.Io 🌥️
 Web app meteo - basata su:
 <br>☀️API Open-Meteo – https://geocoding-api.open-meteo.com/
