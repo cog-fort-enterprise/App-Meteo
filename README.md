@@ -1,4 +1,4 @@
-# Cloud.Io <img src="app_meteo/img/logo.svg" width="40" alt="Cloud.Io logo">
+# Cloud.Io <img src="app_meteo/img/logo.svg" width="60" alt="Cloud.Io logo">
 Web app meteo - basata su:
 <br>☀️API Open-Meteo – https://geocoding-api.open-meteo.com/
 <br>🏘️Elenco dei comuni italiani - https://github.com/matteocontrini/comuni-json
