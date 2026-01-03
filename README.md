@@ -1,3 +1,4 @@
+![alt text]([https://github.com/cog-fort-enterprise/App-Meteo/edit/css-fixed/img/logo.svg] "Logo")
 # Cloud.Io 🌥️
 Web app meteo - basata su:
 <br>☀️API Open-Meteo – https://geocoding-api.open-meteo.com/
