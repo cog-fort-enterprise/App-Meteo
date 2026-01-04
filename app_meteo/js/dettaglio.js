@@ -74,6 +74,8 @@ async function caricaPrevisioniSettimana(lat, lon) {
                 previsioni[i].style.backgroundPosition = "top";
             } else if(codiceMeteo == 3) {
                 previsioni[i].style.backgroundPosition = "bottom";
+            }else if ([80, 81, 82, 85, 86].includes(codiceMeteo)){
+                previsioni[i].style.backgroundPosition = "bottom";
             } else {
                 previsioni[i].style.backgroundPosition = "center";
             }
