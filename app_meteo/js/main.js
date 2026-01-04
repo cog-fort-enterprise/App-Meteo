@@ -15,10 +15,25 @@ const div_ricerca_comuni = document.getElementById("ricerca_comuni");
 const ricerca_comune = document.getElementById("ricerca_comune");
 const lista_comuni = document.getElementById("lista_comuni");
 
+const campiInput = [
+    ricerca_regione,
+    ricerca_provincia,
+    ricerca_comune
+];
+
+campiInput.forEach(campo => {
+    campo.addEventListener("input", () => {
+        avvisoErrore.style.display = "none";
+    });
+});
+
 const output = document.getElementById("output");
+const selezionati = document.getElementById("status");
+const avvisoErrore = document.getElementById("avviso_errore");
 const button_indietro = document.getElementById("bottone_indietro");
 const bottoneRicerca = document.getElementById("bottone_ricerca");
 
+const container_meteo_comune = document.getElementById("container");
 const div_meteo_comune = document.getElementById("meteo_comune");
 const div_temperatura = document.getElementById("temperatura");
 const div_dati_ambiente = document.getElementById("dati_ambiente");
@@ -43,7 +58,7 @@ async function caricaComuni() {
         popolaRegioni();
     } catch (err) {
         console.error("Errore caricamento comuni:", err);
-        output.textContent = "Errore nel caricamento dei comuni. Controlla la console.";
+        output.textContent = "Errore nel caricamento dei comuni.";
     }
 }
 
@@ -59,6 +74,7 @@ function popolaRegioni() {
         lista_regioni.appendChild(op);
     });
     div_ricerca_regioni.style.display = "block";
+    ricerca_regioni.focus();
 }
 
 /* ========== Quando si scrive regione -> popola province ========== */
@@ -69,6 +85,8 @@ ricerca_regione.addEventListener("input", function () {
     lista_provincie.innerHTML = "";
     lista_comuni.innerHTML = "";
     div_ricerca_comuni.style.display = "none";
+
+    selezionati.innerHTML = "<strong>Regione</strong>: " + regioneSelezionata; 
 
     if (!regioneSelezionata) {
         div_ricerca_provincie.style.display = "none";
@@ -94,7 +112,11 @@ ricerca_regione.addEventListener("input", function () {
     });
     div_ricerca_provincie.style.display = "block";
     div_ricerca_regioni.style.display = "none";
+        ricerca_provincia.focus();
 });
+
+ricerca_provincia.addEventListener("input", function(){selezionati.innerHTML = "<strong>Provincia</strong>: " + ricerca_provincia.value.trim();});
+ricerca_comune.addEventListener("input", function(){selezionati.innerHTML = "<strong>Comune</strong>: " + ricerca_comune.value.trim();})
 
 /* ========== Popola comuni quando provincia valida ========== */
 function popolaComuni() {
@@ -126,6 +148,7 @@ function popolaComuni() {
     });
     div_ricerca_comuni.style.display = "block";
     div_ricerca_provincie.style.display = "none";
+    ricerca_comune.focus();
 }
 
 ricerca_provincia.addEventListener("input", function () {
@@ -139,6 +162,7 @@ ricerca_provincia.addEventListener("change", popolaComuni);
 let nomeComune = "";
 let nomeProvincia = "";
 let nomeRegione = "";
+
 function getComuneSelezionato() {
     nomeComune = ricerca_comune.value.trim();
     nomeProvincia = ricerca_provincia.value.trim();
@@ -217,6 +241,7 @@ function weatherDescription(code) {
     return mapping[code] || "Meteo sconosciuto";
 }
 
+
 /* ========== Meteo tramite Open-Meteo ======== */
 async function caricaMeteo(lat, lon) {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}
@@ -226,7 +251,10 @@ async function caricaMeteo(lat, lon) {
 
     try {
         const resp = await fetch(url);
-        if (!resp.ok) throw new Error("Errore meteo");
+        if (!resp.ok) {
+            output.style.display = block;
+            throw new Error("Errore meteo");
+        }
         const data = await resp.json();
 
         // Dati correnti
@@ -257,8 +285,8 @@ async function caricaMeteo(lat, lon) {
         div_temperatura.innerHTML = `
             <p>${emojiMeteo} ${descrizioneMeteo}</p>
             <p>Temperatura attuale: ${tempAttuale}°C</p>
-            <p>Massima oggi: ${tmax}°C</p>
-            <p>Minima oggi: ${tmin}°C</p>
+            <p>Temperatura massima: ${tmax}°C</p>
+            <p>Temperatura minima: ${tmin}°C</p>
         `;
 
         div_dati_ambiente.innerHTML = `
@@ -266,10 +294,10 @@ async function caricaMeteo(lat, lon) {
             <p>Tramonto: ${tramonto.substring(11)}</p>
             <p>Precipitazioni: ${precipitazioni} mm</p>
             <p>Vento attuale: ${vento} km/h</p>
-            <p>Vento massimo previsto: ${ventoMax} km/h</p>
+            <p>Vento massimo: ${ventoMax} km/h</p>
         `;
 
-        div_meteo_comune.style.display = "block";
+        container_meteo_comune.style.display = "block";
 
         return emojiMeteo;
 
@@ -286,11 +314,9 @@ bottoneRicerca.addEventListener("click", async function (e) {
 
     const comuneObj = getComuneSelezionato();
     if (!comuneObj) {
-        output.textContent = "Seleziona regione, provincia e comune validi.";
+        avvisoErrore.style.display = "block";
         return;
     }
-
-    output.textContent = "Ricerca coordinate…";
 
     const coordsObj = await cercaCoordinateOpenMeteo(comuneObj.nome);
     if (!coordsObj) {
@@ -305,11 +331,11 @@ bottoneRicerca.addEventListener("click", async function (e) {
     marker = L.marker([coordsObj.lat, coordsObj.lon]).addTo(map)
         .bindPopup(`${emojiMeteo} ${comuneObj.nome}, ${comuneObj.provincia?.nome || ""}`).openPopup();
 
-    output.textContent = `Comune trovato: ${comuneObj.nome} (${coordsObj.lat.toFixed(5)}, ${coordsObj.lon.toFixed(5)})`;
     coords = coordsObj;
 });
 
 /* ========== Pulsante indietro ========== */
+/*
 button_indietro.addEventListener("click", function () {
     div_ricerca_regioni.style.display = "block";
     div_ricerca_comuni.style.display = "none";
@@ -325,6 +351,11 @@ button_indietro.addEventListener("click", function () {
     map.setView([41.8719, 12.5674], 6);
     div_meteo_comune.style.display = "none";
 });
+*/
+button_indietro.addEventListener("click", function () {
+    window.location.replace(window.location.href);
+});
+
 
 /* ========== Link dettagli ========== */
 function trovaURL() {

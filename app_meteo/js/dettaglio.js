@@ -8,6 +8,22 @@ const giorniSettimana = [
     "Sabato"
 ];
 
+const mesi = [
+    "Gennaio",
+    "Febbraio",
+    "Marzo",
+    "Aprile",
+    "Maggio",
+    "Giugno",
+    "Luglio",
+    "Agosto",
+    "Settembre",
+    "Ottobre",
+    "Novembre",
+    "Dicembre"
+];
+
+
 
 const previsioni = document.getElementsByClassName("prev");
 const comune = document.getElementById("comune");
@@ -37,14 +53,33 @@ async function caricaPrevisioniSettimana(lat, lon) {
             const ventoMax = daily.wind_speed_10m_max[i];
             const codiceMeteo = daily.weather_code[i];
 
+            const dataAttuale = new Date(dataGiorno);
+
             previsioni[i].innerHTML = `
-                <h3>${i === 0 ? "Oggi" : giorniSettimana[numGiorno]}</h3>
+                <h3>${i === 0 ? "Oggi, " + oggi.getDate() + " " +  mesi[oggi.getMonth()] : giorniSettimana[numGiorno] + ", " + dataAttuale.getDate() + " " +  mesi[dataAttuale.getMonth()]}</h3>
                 <p>${weatherEmoji(codiceMeteo)} ${weatherDescription(codiceMeteo)}</p>
                 <p>Max: ${tmax}°C</p>
                 <p>Min: ${tmin}°C</p>
                 <p>Pioggia: ${pioggia} mm</p>
                 <p>Vento max: ${ventoMax} km/h</p>
             `;
+
+            previsioni[i].style.backgroundImage = `
+                linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0)),
+                url(${weatherImage(codiceMeteo)})
+            `;
+            previsioni[i].style.backgroundRepeat = "no-repeat";
+            previsioni[i].style.backgroundSize = "cover";
+            if(codiceMeteo == 0){
+                previsioni[i].style.backgroundPosition = "top";
+            } else if(codiceMeteo == 3) {
+                previsioni[i].style.backgroundPosition = "bottom";
+            } else {
+                previsioni[i].style.backgroundPosition = "center";
+            }
+            
+            
+
 
             if(numGiorno == 6){
                 numGiorno = 0
@@ -106,6 +141,40 @@ function weatherDescription(code) {
     return mapping[code] || "Meteo sconosciuto";
 }
 
+function weatherImage(code){
+    const mapping = {
+        0: "img/sereno.webp",
+        1: "img/poco-nuvoloso.jpg",
+        2: "img/parz-nuvoloso.jpg",
+        3: "img/nuvoloso.jpeg",
+        45: "img/nebbia-leggera.jpg",
+        48: "img/nebbia-brina.jpg",
+        51: "img/pioggia-leggera.jpg",
+        53: "img/pioggia-moderata.jpg",
+        55: "img/pioggia-intensa.jpeg",
+        56: "img/pioggia-ghiacciata-leggera.jpg",
+        57: "img/pioggia-ghiacciata-intensa.jpg",
+        61: "img/pioggia-leggera.jpg",
+        63: "img/pioggia-moderata.jpg",
+        65: "img/pioggia-intensa.jpg",
+        66: "img/pioggia-ghiacciata-leggera.jpg",
+        67: "img/pioggia-ghiacciata-intensa.jpg",
+        71: "img/neve-leggera.jpg",
+        73: "img/neve-leggera.jpg",
+        75: "img/neve-intensa.jpg",
+        77: "img/neve-leggera.jpg",
+        80: "img/rovesci.jpg",
+        81: "img/rovesci.jpg",
+        82: "img/rovesci.jpg",
+        85: "img/rovesci.jpg",
+        86: "img/rovesci.jpg",
+        95: "img/temporale.jpeg",
+        96: "img/temporale-intenso.jpg",
+        99: "img/temporale-intenso.jpg"
+    };
+    return mapping[code] || "Meteo sconosciuto";
+}
+
 /* ======== Lettura da URL ======== */
 let queryString = window.location.search;
 let urlParams = new URLSearchParams(queryString);
@@ -121,4 +190,3 @@ document.addEventListener("DOMContentLoaded", function(){
     comune.innerHTML = nomeComune + " (" + nomeProvincia + "), " + nomeRegione;
     caricaPrevisioniSettimana(lat, lon);
 })
-
