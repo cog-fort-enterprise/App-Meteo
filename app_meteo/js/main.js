@@ -7,9 +7,9 @@ const div_ricerca_regioni = document.getElementById("ricerca_regioni");
 const ricerca_regione = document.getElementById("ricerca_regione");
 const lista_regioni = document.getElementById("lista_regioni");
 
-const div_ricerca_provincie = document.getElementById("ricerca_provincie");
+const div_ricerca_province = document.getElementById("ricerca_province");
 const ricerca_provincia = document.getElementById("ricerca_provincia");
-const lista_provincie = document.getElementById("lista_provincie");
+const lista_province = document.getElementById("lista_province");
 
 const div_ricerca_comuni = document.getElementById("ricerca_comuni");
 const ricerca_comune = document.getElementById("ricerca_comune");
@@ -20,7 +20,7 @@ const campiInput = [
     ricerca_provincia,
     ricerca_comune
 ];
-
+// Nascondere messaggio di errore appena l’utente ricomincia a scrivere
 campiInput.forEach(campo => {
     campo.addEventListener("input", () => {
         avvisoErrore.style.display = "none";
@@ -42,18 +42,19 @@ const button_mostra_dettagli = document.getElementById("mostra_dettagli");
 const link_dettaglio = document.getElementById("link_dettaglio");
 
 /* ========== Mappa Leaflet ========== */
-let map = L.map('map').setView([41.8719, 12.5674], 6); // Italia centrata
+let map = L.map('map').setView([41.8719, 12.5674], 6); // mappa centrata sull'Italia
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 let marker = null;
 
+// Controlla se esiste e setta il suo tipo a button
 if (bottoneRicerca) bottoneRicerca.type = "button";
 
 /* ========== Caricamento JSON comuni ========== */
-async function caricaComuni() {
+async function caricaComuni() { // async perché richiede tempo e dipende dalla rete (viene chiamato fetch() all'internp, che è asincrono)
     try {
-        const resp = await fetch(URL_COMUNI);
+        const resp = await fetch(URL_COMUNI); //richiesta HTTP GET, await per aspettare risposta
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const data = await resp.json();
+        const data = await resp.json(); // la conversione è asincrona e va attesa
         comuni = data;
         popolaRegioni();
     } catch (err) {
@@ -64,9 +65,9 @@ async function caricaComuni() {
 
 /* ========== Popola regioni ========== */
 function popolaRegioni() {
-    if (!comuni || comuni.length === 0) return;
-    const regioni = Array.from(new Set(comuni.map(c => c.regione?.nome).filter(Boolean)))
-                        .sort((a,b) => a.localeCompare(b, 'it'));
+    if (!comuni || comuni.length === 0) return; // fermare funzione se array vuoto o comuni non caricati
+    const regioni = Array.from(new Set(comuni.map(c => c.regione?.nome).filter(Boolean))) // map prende il nome della regione, ?. evita errori se dato manca, filter elimina valori null o undefined, Set elimina i duplicati
+                        .sort((a,b) => a.localeCompare(b, 'it')); // ordina secondo lingua italiana
     lista_regioni.innerHTML = "";
     regioni.forEach(r => {
         const op = document.createElement("option");
@@ -77,40 +78,41 @@ function popolaRegioni() {
     ricerca_regioni.focus();
 }
 
-/* ========== Quando si scrive regione -> popola province ========== */
+/* ========== Ricerca regione e popola province ========== */
 ricerca_regione.addEventListener("input", function () {
     const regioneSelezionata = ricerca_regione.value.trim();
     ricerca_provincia.value = "";
     ricerca_comune.value = "";
-    lista_provincie.innerHTML = "";
+    lista_province.innerHTML = "";
     lista_comuni.innerHTML = "";
     div_ricerca_comuni.style.display = "none";
 
     selezionati.innerHTML = "<strong>Regione</strong>: " + regioneSelezionata; 
 
+    // evita ricerche inutili
     if (!regioneSelezionata) {
-        div_ricerca_provincie.style.display = "none";
+        div_ricerca_province.style.display = "none";
         return;
     }
 
-    const provincie = comuni
-        .filter(c => c.regione?.nome === regioneSelezionata)
-        .map(c => c.provincia?.nome)
-        .filter(Boolean);
+    const province = comuni
+        .filter(c => c.regione?.nome === regioneSelezionata) // seleziona comuni appartenenti a regione selezionata
+        .map(c => c.provincia?.nome) // estrae provincia
+        .filter(Boolean); // elimina valori come null o undefined
 
-    const provincieUniche = Array.from(new Set(provincie)).sort((a,b) => a.localeCompare(b, 'it'));
-    if (provincieUniche.length === 0) {
-        div_ricerca_provincie.style.display = "none";
+    const provinceUniche = Array.from(new Set(province)).sort((a,b) => a.localeCompare(b, 'it')); // Set elimina duplicati, poi ordinamento
+    if (provinceUniche.length === 0) {
+        div_ricerca_province.style.display = "none";
         return;
     }
 
-    lista_provincie.innerHTML = "";
-    provincieUniche.forEach(p => {
+    lista_province.innerHTML = "";
+    provinceUniche.forEach(p => {
         const op = document.createElement("option");
         op.value = p;
-        lista_provincie.appendChild(op);
+        lista_province.appendChild(op);
     });
-    div_ricerca_provincie.style.display = "block";
+    div_ricerca_province.style.display = "block";
     div_ricerca_regioni.style.display = "none";
         ricerca_provincia.focus();
 });
@@ -147,13 +149,13 @@ function popolaComuni() {
         lista_comuni.appendChild(op);
     });
     div_ricerca_comuni.style.display = "block";
-    div_ricerca_provincie.style.display = "none";
+    div_ricerca_province.style.display = "none";
     ricerca_comune.focus();
 }
 
 ricerca_provincia.addEventListener("input", function () {
     const val = ricerca_provincia.value;
-    const match = Array.from(lista_provincie.options).some(opt => opt.value === val);
+    const match = Array.from(lista_province.options).some(opt => opt.value === val);
     if (match) popolaComuni();
 });
 ricerca_provincia.addEventListener("change", popolaComuni);
@@ -168,23 +170,24 @@ function getComuneSelezionato() {
     nomeProvincia = ricerca_provincia.value.trim();
     nomeRegione = ricerca_regione.value.trim();
 
-    if (!nomeComune || !nomeProvincia || !nomeRegione) return null;
+    if (!nomeComune || !nomeProvincia || !nomeRegione) return null; // controllo completezza, se c'è un null allora resistisce null e interrompe
 
-    return comuni.find(c =>
+    return comuni.find(c => // restituisce il primo elemento che soddisfa condizione
         c.nome === nomeComune &&
         c.provincia?.nome === nomeProvincia &&
         c.regione?.nome === nomeRegione
-    ) || null;
-}
+    ) || null; // restituisce null invece di undefined se non si trova
+} 
 
 /* ========== Funzione per chiamare Open-Meteo Geocoding ========== */
 async function cercaCoordinateOpenMeteo(nomeComune) {
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(nomeComune)}&count=1&language=it&format=json`;
+    // inserisce nomeComune nell'URL convertendo spazi e caratteri speciali, count per solo risultato più rilevante, language per lingua risposta, format per scegliere formato risposta
     try {
-        const resp = await fetch(url);
+        const resp = await fetch(url); // richiesta HTTP GET
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const data = await resp.json();
-        if (!data.results || data.results.length === 0) return null;
+        const data = await resp.json(); // json in oggetto js
+        if (!data.results || data.results.length === 0) return null; // restituisce null per evitare errori se non trova comune
         const r = data.results[0];
         return { lat: r.latitude, lon: r.longitude, raw: r };
     } catch (err) {
@@ -303,7 +306,7 @@ async function caricaMeteo(lat, lon) {
 
     } catch (err) {
         console.error(err);
-        div_temperatura.textContent = "Errore caricamento meteo.";
+        output.textContent = "Errore caricamento meteo.";
         return "❓";
     }
 }
@@ -328,30 +331,12 @@ bottoneRicerca.addEventListener("click", async function (e) {
 
     map.setView([coordsObj.lat, coordsObj.lon], 13);
     if (marker) map.removeLayer(marker);
-    marker = L.marker([coordsObj.lat, coordsObj.lon]).addTo(map)
-        .bindPopup(`${emojiMeteo} ${comuneObj.nome}, ${comuneObj.provincia?.nome || ""}`).openPopup();
+    marker = L.marker([coordsObj.lat, coordsObj.lon]).addTo(map).bindPopup(`${emojiMeteo} ${comuneObj.nome}, ${comuneObj.provincia?.nome || ""}`).openPopup();
 
     coords = coordsObj;
 });
 
 /* ========== Pulsante indietro ========== */
-/*
-button_indietro.addEventListener("click", function () {
-    div_ricerca_regioni.style.display = "block";
-    div_ricerca_comuni.style.display = "none";
-    div_ricerca_provincie.style.display = "none";
-    ricerca_regione.value = "";
-    ricerca_provincia.value = "";
-    ricerca_comune.value = "";
-    output.textContent = "";
-    if (marker) {
-        map.removeLayer(marker);
-        marker = null;
-    }
-    map.setView([41.8719, 12.5674], 6);
-    div_meteo_comune.style.display = "none";
-});
-*/
 button_indietro.addEventListener("click", function () {
     window.location.replace(window.location.href);
 });

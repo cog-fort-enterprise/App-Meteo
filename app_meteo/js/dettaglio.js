@@ -79,10 +79,7 @@ async function caricaPrevisioniSettimana(lat, lon) {
             } else {
                 previsioni[i].style.backgroundPosition = "center";
             }
-            
-            
-
-
+            // controllo per evitare errori indici, quando = 6, ritorna a 0, altrimenti incrementa di 1
             if(numGiorno == 6){
                 numGiorno = 0
             } else {
@@ -153,7 +150,7 @@ function weatherImage(code){
         48: "img/nebbia-brina.jpg",
         51: "img/pioggia-leggera.jpg",
         53: "img/pioggia-moderata.jpg",
-        55: "img/pioggia-intensa.jpeg",
+        55: "img/pioggia-intensa.jpg",
         56: "img/pioggia-ghiacciata-leggera.jpg",
         57: "img/pioggia-ghiacciata-intensa.jpg",
         61: "img/pioggia-leggera.jpg",
