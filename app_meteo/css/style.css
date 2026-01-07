@@ -1,3 +1,4 @@
+/* stili generali */
 body{
   background-color: #669cc569;
   padding: 0;
@@ -10,6 +11,7 @@ main{
 
 /*================== INDEX ==================*/
 
+/* stili per header */
 h1{
   color: #4F959D;
   font-size: 7vmin;
@@ -28,6 +30,7 @@ header{
   margin-top: 11vh;
 }
 
+/* stili per div output utente */
 #output{
   margin: 1rem;
   color: rgb(255, 95, 95);
@@ -53,7 +56,7 @@ header{
   border-radius: 0.5rem;
 }
 
-
+/* stili per div contenente la mappa */
 #map{
   height: 40vh; 
   width: 100%;
@@ -62,6 +65,7 @@ header{
   margin-top: 3rem;
 }
 
+/* stili generali per i bottoni */
 .bottone{
   background: none;
   border: none;
@@ -70,6 +74,7 @@ header{
   cursor: pointer;
 }
 
+/* stili per le immagini all'interno dei bottoni */
 #lens{
   height: 4vh;
   min-height: 2vh;
@@ -82,14 +87,14 @@ header{
   width: 4vw;
 }
 
-/* Container del form con posizionamento relativo */
+/* stili per il div contenente gli input */
 #form {
   position: relative;
   max-width: 50vw;
   margin: 0 auto;
 }
 
-/* Container principale che contiene bottone indietro + input + bottone ricerca */
+/* container principale che contiene bottone indietro + input + bottone ricerca */
 #containerForm1 {
   position: relative;
   display: flex;
@@ -97,7 +102,7 @@ header{
   gap: 0;
 }
 
-/* Bottone indietro posizionato a sinistra */
+/* bottone indietro posizionato a sinistra */
 #bottone_indietro {
   position: absolute;
   left: -1.2vw;
@@ -107,7 +112,7 @@ header{
   justify-content: center;
 }
 
-/* Bottone ricerca posizionato a destra */
+/* bottone ricerca posizionato a destra */
 #bottone_ricerca {
   position: absolute;
   right: -0.5vw;
@@ -118,14 +123,11 @@ header{
   justify-content: center;
 }
 
+/* stili per gli input */
 #ricerca_regioni, #ricerca_provincie, #ricerca_comuni {
   position: relative;
   display: block;
   width: 100%;
-}
-
-#ricerca_regioni label, #ricerca_provincie label, #ricerca_comuni label {
-  display: none;
 }
 
 input{
@@ -143,9 +145,7 @@ input{
   box-sizing: border-box;
 }
 
-
-
-/* div nascosti */
+/* stili per i div nascosti */
 #meteo_comune {
     font-size: 1.2em;
     display: flex;
@@ -185,6 +185,7 @@ input{
     transform: scale(1.2);
 }
 
+/* stili per il bottone mostra dettagli */
 #mostra_dettagli{
     border-radius: 0.5rem;
     border: #4F959D solid 3px;
@@ -199,6 +200,7 @@ input{
     scale: 1.1;
 }
 
+/* stili per il footer */
 footer {
     width: 100%;
     background: #4F959D;
@@ -250,6 +252,7 @@ footer {
 
 
 /*================== DETTAGLIO ==================*/
+/* stili per bottone per tornare alla pagina di ricerca */
 #torna_indietro{
     position: fixed;
     top: 0.5rem;
@@ -266,6 +269,8 @@ footer {
   cursor: pointer;
   scale: 1.1;
 }
+
+/* stili per i div delle previsioni */
 .prev{
     background-color: #4f959d49;
     border: #4F959D solid 3px;
@@ -276,6 +281,8 @@ footer {
     text-align: left;
     margin: 3rem 7rem;
 }
+
+/* stili per h3 contenente comune provincia e regione */
 #comune{
   font-size: 1.5rem;
   font-style: italic;
@@ -283,34 +290,9 @@ footer {
   margin-top: 0vh;
 }
 /*================== CLASSI CARATTERI ==================*/
-
-.poppins-thin {
-  font-family: "Poppins", sans-serif;
-  font-weight: 100;
-  font-style: normal;
-}
-
-.poppins-extralight {
-  font-family: "Poppins", sans-serif;
-  font-weight: 200;
-  font-style: normal;
-}
-
-.poppins-light {
-  font-family: "Poppins", sans-serif;
-  font-weight: 300;
-  font-style: normal;
-}
-
 .poppins-regular {
   font-family: "Poppins", sans-serif;
   font-weight: 400;
-  font-style: normal;
-}
-
-.poppins-medium {
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
   font-style: normal;
 }
 
@@ -324,70 +306,4 @@ footer {
   font-family: "Poppins", sans-serif;
   font-weight: 700;
   font-style: normal;
-}
-
-.poppins-extrabold {
-  font-family: "Poppins", sans-serif;
-  font-weight: 800;
-  font-style: normal;
-}
-
-.poppins-black {
-  font-family: "Poppins", sans-serif;
-  font-weight: 900;
-  font-style: normal;
-}
-
-.poppins-thin-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 100;
-  font-style: italic;
-}
-
-.poppins-extralight-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 200;
-  font-style: italic;
-}
-
-.poppins-light-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 300;
-  font-style: italic;
-}
-
-.poppins-regular-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 400;
-  font-style: italic;
-}
-
-.poppins-medium-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
-  font-style: italic;
-}
-
-.poppins-semibold-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 600;
-  font-style: italic;
-}
-
-.poppins-bold-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 700;
-  font-style: italic;
-}
-
-.poppins-extrabold-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 800;
-  font-style: italic;
-}
-
-.poppins-black-italic {
-  font-family: "Poppins", sans-serif;
-  font-weight: 900;
-  font-style: italic;
 }

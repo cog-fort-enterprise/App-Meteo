@@ -20,7 +20,7 @@ const campiInput = [
     ricerca_provincia,
     ricerca_comune
 ];
-// Nascondere messaggio di errore appena l’utente ricomincia a scrivere
+// nascondere messaggio di errore appena l’utente ricomincia a scrivere
 campiInput.forEach(campo => {
     campo.addEventListener("input", () => {
         avvisoErrore.style.display = "none";
@@ -42,20 +42,21 @@ const button_mostra_dettagli = document.getElementById("mostra_dettagli");
 const link_dettaglio = document.getElementById("link_dettaglio");
 
 /* ========== Mappa Leaflet ========== */
+// impostazione della mappa e eliminazione eventuali marker (per sicureza)
 let map = L.map('map').setView([41.8719, 12.5674], 6); // mappa centrata sull'Italia
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 let marker = null;
 
-// Controlla se esiste e setta il suo tipo a button
+// controlla se esiste bottoneRicerca e setta il suo tipo a button
 if (bottoneRicerca) bottoneRicerca.type = "button";
 
 /* ========== Caricamento JSON comuni ========== */
-async function caricaComuni() { // async perché richiede tempo e dipende dalla rete (viene chiamato fetch() all'internp, che è asincrono)
+async function caricaComuni() { // async perché richiede tempo e dipende dalla rete (viene chiamato fetch() all'interno, che è asincrono)
     try {
-        const resp = await fetch(URL_COMUNI); //richiesta HTTP GET, await per aspettare risposta
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const resp = await fetch(URL_COMUNI); // richiesta HTTP GET, await per aspettare risposta
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`); // evita di usare dati corrotti se c'è errore
         const data = await resp.json(); // la conversione è asincrona e va attesa
-        comuni = data;
+        comuni = data; // salvo dati ottenuti nell'array comuni
         popolaRegioni();
     } catch (err) {
         console.error("Errore caricamento comuni:", err);
@@ -68,25 +69,28 @@ function popolaRegioni() {
     if (!comuni || comuni.length === 0) return; // fermare funzione se array vuoto o comuni non caricati
     const regioni = Array.from(new Set(comuni.map(c => c.regione?.nome).filter(Boolean))) // map prende il nome della regione, ?. evita errori se dato manca, filter elimina valori null o undefined, Set elimina i duplicati
                         .sort((a,b) => a.localeCompare(b, 'it')); // ordina secondo lingua italiana
-    lista_regioni.innerHTML = "";
+    lista_regioni.innerHTML = ""; // pulizia della datalist
+    //creazione opzioni da inserire nella datalist
     regioni.forEach(r => {
         const op = document.createElement("option");
         op.value = r;
         lista_regioni.appendChild(op);
     });
     div_ricerca_regioni.style.display = "block";
-    ricerca_regioni.focus();
+    ricerca_regioni.focus(); // per semplificare l'esperienza dell'utente, il cursore rimane sull'input, senza che debba cliccarci
 }
 
 /* ========== Ricerca regione e popola province ========== */
 ricerca_regione.addEventListener("input", function () {
-    const regioneSelezionata = ricerca_regione.value.trim();
+    const regioneSelezionata = ricerca_regione.value.trim(); // selezione della regione
+    // pulizia per sicurezza
     ricerca_provincia.value = "";
     ricerca_comune.value = "";
     lista_province.innerHTML = "";
     lista_comuni.innerHTML = "";
     div_ricerca_comuni.style.display = "none";
 
+    // feedback per l'utente
     selezionati.innerHTML = "<strong>Regione</strong>: " + regioneSelezionata; 
 
     // evita ricerche inutili
@@ -95,17 +99,20 @@ ricerca_regione.addEventListener("input", function () {
         return;
     }
 
+    // creazione array delle province
     const province = comuni
-        .filter(c => c.regione?.nome === regioneSelezionata) // seleziona comuni appartenenti a regione selezionata
+        .filter(c => c.regione?.nome === regioneSelezionata) // seleziona province appartenenti a regione selezionata
         .map(c => c.provincia?.nome) // estrae provincia
         .filter(Boolean); // elimina valori come null o undefined
 
+    //pulizia array
     const provinceUniche = Array.from(new Set(province)).sort((a,b) => a.localeCompare(b, 'it')); // Set elimina duplicati, poi ordinamento
     if (provinceUniche.length === 0) {
         div_ricerca_province.style.display = "none";
         return;
     }
 
+    // pulizia datalist, creazione e inserimento delle option nella datalist
     lista_province.innerHTML = "";
     provinceUniche.forEach(p => {
         const op = document.createElement("option");
@@ -117,9 +124,6 @@ ricerca_regione.addEventListener("input", function () {
         ricerca_provincia.focus();
 });
 
-ricerca_provincia.addEventListener("input", function(){selezionati.innerHTML = "<strong>Provincia</strong>: " + ricerca_provincia.value.trim();});
-ricerca_comune.addEventListener("input", function(){selezionati.innerHTML = "<strong>Comune</strong>: " + ricerca_comune.value.trim();})
-
 /* ========== Popola comuni quando provincia valida ========== */
 function popolaComuni() {
     const provinciaSelezionata = ricerca_provincia.value.trim();
@@ -127,23 +131,27 @@ function popolaComuni() {
     ricerca_comune.value = "";
     lista_comuni.innerHTML = "";
 
+    // controllo validità input
     if (!provinciaSelezionata || !regioneSelezionata) {
         div_ricerca_comuni.style.display = "none";
         return;
     }
 
-    const comm = comuni
+    // selezione dei comuni appartenenti alla provincia
+    const com = comuni
         .filter(c => c.provincia?.nome === provinciaSelezionata && c.regione?.nome === regioneSelezionata)
         .map(c => c.nome)
         .filter(Boolean);
 
-    const commUnici = Array.from(new Set(comm)).sort((a,b) => a.localeCompare(b, 'it'));
-    if (commUnici.length === 0) {
+    // pulizia dell'array
+    const comUnici = Array.from(new Set(com)).sort((a,b) => a.localeCompare(b, 'it'));
+    if (comUnici.length === 0) {
         div_ricerca_comuni.style.display = "none";
         return;
     }
 
-    commUnici.forEach(nome => {
+    //creazione delle option
+    comUnici.forEach(nome => {
         const op = document.createElement("option");
         op.value = nome;
         lista_comuni.appendChild(op);
@@ -153,12 +161,16 @@ function popolaComuni() {
     ricerca_comune.focus();
 }
 
+//controllo validità input province e popola comuni
 ricerca_provincia.addEventListener("input", function () {
+    selezionati.innerHTML = "<strong>Provincia</strong>: " + ricerca_provincia.value.trim(); // feedback utente
     const val = ricerca_provincia.value;
     const match = Array.from(lista_province.options).some(opt => opt.value === val);
     if (match) popolaComuni();
 });
-ricerca_provincia.addEventListener("change", popolaComuni);
+
+// altro feedback per l'utente
+ricerca_comune.addEventListener("input", function(){selezionati.innerHTML = "<strong>Comune</strong>: " + ricerca_comune.value.trim();})
 
 /* ========== Recupera oggetto comune dal JSON ========== */
 let nomeComune = "";
@@ -185,7 +197,7 @@ async function cercaCoordinateOpenMeteo(nomeComune) {
     // inserisce nomeComune nell'URL convertendo spazi e caratteri speciali, count per solo risultato più rilevante, language per lingua risposta, format per scegliere formato risposta
     try {
         const resp = await fetch(url); // richiesta HTTP GET
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`); // controllo se ci sono errori e in caso interrompe lanciando errore, per evitare di lavorare con dati corrotti
         const data = await resp.json(); // json in oggetto js
         if (!data.results || data.results.length === 0) return null; // restituisce null per evitare errori se non trova comune
         const r = data.results[0];
@@ -196,7 +208,7 @@ async function cercaCoordinateOpenMeteo(nomeComune) {
     }
 }
 
-/* ========== Associa icona a meteo ========== */
+// funzione che associa emoji descrittiva a codice meteo
 function weatherEmoji(code) {
     const mapping = {
         0: "☀️",   1: "🌤️",  2: "⛅",   3: "☁️",
@@ -210,6 +222,7 @@ function weatherEmoji(code) {
     return mapping[code] || "❓";
 }
 
+// funzione che associa descrizione meteo a codice meteo
 function weatherDescription(code) {
     const mapping = {
         0: "Sereno",
@@ -247,20 +260,21 @@ function weatherDescription(code) {
 
 /* ========== Meteo tramite Open-Meteo ======== */
 async function caricaMeteo(lat, lon) {
+    // creazione URL per chiamata a API Open Meteo
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}
         &current_weather=true
         &daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,wind_speed_10m_max
         &timezone=auto`.replace(/\s+/g, "");
 
     try {
-        const resp = await fetch(url);
+        const resp = await fetch(url); // richiesta HTTP GET
         if (!resp.ok) {
-            output.style.display = block;
+            output.style.display = block; // mostra all'utente che c'è stato un errore
             throw new Error("Errore meteo");
         }
-        const data = await resp.json();
+        const data = await resp.json(); // trsformazione in json
 
-        // Dati correnti
+        // salvo i dati meteo
         const current = data.current_weather;
         const giornaliero = data.daily;
 
@@ -277,6 +291,7 @@ async function caricaMeteo(lat, lon) {
         const precipitazioni = giornaliero.precipitation_sum[0];
         const ventoMax = giornaliero.wind_speed_10m_max[0];
 
+        // aggiungo i dati meteo ai div
         div_info_comune.innerHTML = `
             <h2>Comune di ${nomeComune}</h2>
             <p>Provincia: ${nomeProvincia}</p>
@@ -300,8 +315,10 @@ async function caricaMeteo(lat, lon) {
             <p>Vento massimo: ${ventoMax} km/h</p>
         `;
 
+        // mostro i div all'utente
         container_meteo_comune.style.display = "block";
 
+        // return utile per dopo
         return emojiMeteo;
 
     } catch (err) {
@@ -312,43 +329,48 @@ async function caricaMeteo(lat, lon) {
 }
 
 /* ========== Bottone ricerca ========== */
+// callback async perché richiama funzione async
 bottoneRicerca.addEventListener("click", async function (e) {
     e.preventDefault();
 
-    const comuneObj = getComuneSelezionato();
+    const comuneObj = getComuneSelezionato(); // ottiene comune
     if (!comuneObj) {
-        avvisoErrore.style.display = "block";
+        avvisoErrore.style.display = "block"; // mostra errore all'utente se è null
         return;
     }
 
-    const coordsObj = await cercaCoordinateOpenMeteo(comuneObj.nome);
+    const coordsObj = await cercaCoordinateOpenMeteo(comuneObj.nome); // ottiene le coordinate
     if (!coordsObj) {
-        output.textContent = "Coordinate non trovate tramite Open-Meteo.";
+        output.textContent = "Coordinate non trovate tramite Open-Meteo."; // messaggio di errore per l'utente
         return;
     }
 
-    const emojiMeteo = await caricaMeteo(coordsObj.lat, coordsObj.lon);
+    const emojiMeteo = await caricaMeteo(coordsObj.lat, coordsObj.lon); // salvo l'emoji da mettere sul popup
 
-    map.setView([coordsObj.lat, coordsObj.lon], 13);
-    if (marker) map.removeLayer(marker);
-    marker = L.marker([coordsObj.lat, coordsObj.lon]).addTo(map).bindPopup(`${emojiMeteo} ${comuneObj.nome}, ${comuneObj.provincia?.nome || ""}`).openPopup();
+    map.setView([coordsObj.lat, coordsObj.lon], 13); // settare mappa sul comune selezionato
+    if (marker) map.removeLayer(marker); // rimuove eventuali marker già presenti
+    marker = L.marker([coordsObj.lat, coordsObj.lon]).addTo(map).bindPopup(`${emojiMeteo} ${comuneObj.nome}, ${comuneObj.provincia?.nome || ""}`).openPopup(); // crea popup con comune, provincia e emoji
 
     coords = coordsObj;
 });
 
 /* ========== Pulsante indietro ========== */
+// pulsante che ricarica la pagina, per eliminare ricerca
 button_indietro.addEventListener("click", function () {
     window.location.replace(window.location.href);
 });
 
 
 /* ========== Link dettagli ========== */
+//creazione URL per trasmettere informazioni a dettaglio.html
 function trovaURL() {
     if (!coords) return;
     let url = `dettaglio.html?comune=${nomeComune}&provincia=${nomeProvincia}&regione=${nomeRegione}&lat=${coords.lat}&lon=${coords.lon}`;
     link_dettaglio.href = url;
 }
+// al click di mostrDettagli, viene associata l'URL corretta 
 button_mostra_dettagli.addEventListener("click", trovaURL);
 
 /* ========== Avvio ========== */
+//esecuzione di caricaComuni al caricamento della pagina => inizio del codice
 document.addEventListener("DOMContentLoaded", caricaComuni);
