@@ -1,3 +1,5 @@
+
+// array con i giorni della settimana, utilizzato in seguito
 const giorniSettimana = [
     "Domenica",
     "Lunedì",
@@ -8,6 +10,7 @@ const giorniSettimana = [
     "Sabato"
 ];
 
+// array con i mesi dell'anno, utilizzato in seguito
 const mesi = [
     "Gennaio",
     "Febbraio",
@@ -23,29 +26,32 @@ const mesi = [
     "Dicembre"
 ];
 
-
-
+/*======== Config ========*/
 const previsioni = document.getElementsByClassName("prev");
 const comune = document.getElementById("comune");
 
 /* ======== Previsioni settimana ======== */
 async function caricaPrevisioniSettimana(lat, lon) {
+    // costruisco URL
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}
         &daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,weather_code
         &timezone=auto`.replace(/\s+/g, "");
 
     try {
-        const resp = await fetch(url);
+        const resp = await fetch(url); // chiamata a API
         if (!resp.ok) throw new Error("Errore previsioni settimana");
-        const data = await resp.json();
+        const data = await resp.json(); //trasformazione in json
 
         const daily = data.daily;
 
+        // salvo oggi e il numero del giorno (0-6)
         let oggi = new Date();
         let numGiorno = oggi.getDay();
 
+        // per avere previsioni per tutta la settimana, in base ai div vuoti con classe .prev su dettaglio.html
         for (let i = 0; i < previsioni.length && i < daily.time.length; i++) {
-
+            
+            // salvo dati da inserire nei div .prev
             const dataGiorno = daily.time[i];
             const tmax = daily.temperature_2m_max[i];
             const tmin = daily.temperature_2m_min[i];
@@ -55,6 +61,8 @@ async function caricaPrevisioniSettimana(lat, lon) {
 
             const dataAttuale = new Date(dataGiorno);
 
+            // utilizzo operatore ternario (condizione ? valoreSeVero : valoreSeFalso) per inserire oggi o determinato giorno della settimana, scrivendo giorno e mese
+            // inserisco i dati nel div .prev selezionato dall'indice i (da previsioni)
             previsioni[i].innerHTML = `
                 <h3>${i === 0 ? "Oggi, " + oggi.getDate() + " " +  mesi[oggi.getMonth()] : giorniSettimana[numGiorno] + ", " + dataAttuale.getDate() + " " +  mesi[dataAttuale.getMonth()]}</h3>
                 <p>${weatherEmoji(codiceMeteo)} ${weatherDescription(codiceMeteo)}</p>
@@ -64,10 +72,12 @@ async function caricaPrevisioniSettimana(lat, lon) {
                 <p>Vento max: ${ventoMax} km/h</p>
             `;
 
+            // aggiungere immagine di sfondo con gradiente per facilizzare visualizzazione dati in base al codice meteo
             previsioni[i].style.backgroundImage = `
                 linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0)),
                 url(${weatherImage(codiceMeteo)})
             `;
+            // stili per le immagini di sfondo
             previsioni[i].style.backgroundRepeat = "no-repeat";
             previsioni[i].style.backgroundSize = "cover";
             if(codiceMeteo == 0){
@@ -92,7 +102,7 @@ async function caricaPrevisioniSettimana(lat, lon) {
     }
 }
 
-/* ========== Associa icona a meteo ========== */
+// funzione che associa emoji descrittiva a codice meteo
 function weatherEmoji(code) {
     const mapping = {
         0: "☀️",   1: "🌤️",  2: "⛅",   3: "☁️",
@@ -106,6 +116,7 @@ function weatherEmoji(code) {
     return mapping[code] || "❓";
 }
 
+// funzione che associa descrizione meteo a codice meteo
 function weatherDescription(code) {
     const mapping = {
         0: "Sereno",
@@ -140,6 +151,7 @@ function weatherDescription(code) {
     return mapping[code] || "Meteo sconosciuto";
 }
 
+// funzione che associa immagine di sfondo a codice meteo
 function weatherImage(code){
     const mapping = {
         0: "img/sereno.webp",
@@ -175,6 +187,7 @@ function weatherImage(code){
 }
 
 /* ======== Lettura da URL ======== */
+// lettura delle informazioni passate tramite la URL da index.html
 let queryString = window.location.search;
 let urlParams = new URLSearchParams(queryString);
 let nomeComune = urlParams.get('comune')
@@ -184,7 +197,7 @@ let lat = urlParams.get('lat')
 let lon = urlParams.get('lon')
 
 
-/* ======== Caricare dati ======== */
+/* ======== Caricare dati sulla pagina ======== */
 document.addEventListener("DOMContentLoaded", function(){
     comune.innerHTML = nomeComune + " (" + nomeProvincia + "), " + nomeRegione;
     caricaPrevisioniSettimana(lat, lon);
