@@ -4,4 +4,4 @@ Web app meteo - basata su:
 <br>🏘️Elenco dei comuni italiani - https://github.com/matteocontrini/comuni-json
 <br>📍Leaflet - https://leafletjs.com/
 <br>
-<a href="https://cog-fort-enterprise.github.io/App-Meteo/app_meteo/index.html"> CLICCA QUI </a>
+<a href="https://cog-fort-enterprise.github.io/App-Meteo/app_meteo/index.html" target="_blank"> CLICCA QUI </a>
